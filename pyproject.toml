@@ -77,7 +77,7 @@ disallow_any_unimported = false
 [tool.ruff]
 fix = true
 line-length = 88
-include = ["mailchimp_api/**/*.py", "mailchimp_api/**/*.pyi", "pyproject.toml"]
+include = ["mailchimp_api/**/*.py", "mailchimp_api/**/*.pyi", "tests/**/*.py", "pyproject.toml"]
 exclude = []
 
 [tool.ruff.lint]
