@@ -1,0 +1,1 @@
+mailchimp_openapi.json filter=lfs diff=lfs merge=lfs -text
