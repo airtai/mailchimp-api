@@ -8,7 +8,7 @@ version = "0.1.0"
 name = "mailchimp_api"
 
 dependencies = [
-    "fastagency[autogen,mesop,server,fastapi]>=0.3.0",
+    "fastagency[autogen,mesop,openapi,server,fastapi]>=0.3.0",
 ]
 
 [project.optional-dependencies]
@@ -126,5 +126,5 @@ convention = "google"
 line-length = 88
 
 [tool.codespell]
-skip = "./venv*"
+skip = "./venv*,./mailchimp_openapi.json"
 ignore-words = ".codespell-whitelist.txt"

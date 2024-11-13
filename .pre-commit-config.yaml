@@ -35,4 +35,5 @@ repos:
     rev: v1.5.0
     hooks:
       - id: detect-secrets
+        exclude: "mailchimp_openapi.json"
         args: ["--baseline", ".secrets.baseline"]
