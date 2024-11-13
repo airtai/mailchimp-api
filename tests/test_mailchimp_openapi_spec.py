@@ -53,7 +53,7 @@ class TestMailchimpOpenapiSpec:
         func(body={})
 
     @patch("fastagency.api.openapi.client.requests.get")
-    def test_mailchimp_api(
+    def test_mailchimp_api_ping(
         self,
         mock_post: MagicMock,
         setup_api: OpenAPI,
@@ -66,6 +66,24 @@ class TestMailchimpOpenapiSpec:
 
         mock_post.assert_called_once_with(
             f"{setup_api.servers[0]['url']}/ping",
+            params={},
+            headers=self.headers,
+        )
+
+    @patch("fastagency.api.openapi.client.requests.get")
+    def test_mailchimp_api_get_lists(
+        self,
+        mock_post: MagicMock,
+        setup_api: OpenAPI,
+    ) -> None:
+        self._test_mailchimp_api(
+            mock_post=mock_post,
+            setup_api=setup_api,
+            function="get_lists",
+        )
+
+        mock_post.assert_called_once_with(
+            f"{setup_api.servers[0]['url']}/lists",
             params={},
             headers=self.headers,
         )
