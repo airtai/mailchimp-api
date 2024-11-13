@@ -13,7 +13,7 @@ class TestMailchimpOpenapiSpec:
     def setup(
         self,
     ) -> Iterator[None]:
-        self.api = create_api()
+        self.api = create_api(mailchimp_api_key="test Key")
         yield
 
 
@@ -51,5 +51,6 @@ class TestMailchimpOpenapiSpec:
             params={},
             headers={
                 'Content-Type': 'application/json',
+                'Authorization': 'Basic YW55c3RyaW5nOnRlc3QgS2V5',
             },
         )
