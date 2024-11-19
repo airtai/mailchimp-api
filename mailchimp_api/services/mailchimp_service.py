@@ -13,7 +13,7 @@ class MailchimpService:
     def _mailchim_request_get(self, url: str) -> dict[str, list[dict[str, str]]]:
         response = requests.get(url, headers=self.config.headers, timeout=10)
 
-        if response.status_code != 200:
+        if response.status_code < 200 or response.status_code >= 300:
             # This automatically raises an HTTPError with details
             response.raise_for_status()
 
@@ -24,7 +24,8 @@ class MailchimpService:
             url, headers=self.config.headers, json=body, timeout=10
         )
 
-        if response.status_code != 200:
+        # Check if the response is not 200-299
+        if response.status_code < 200 or response.status_code >= 300:
             # This automatically raises an HTTPError with details
             response.raise_for_status()
 
