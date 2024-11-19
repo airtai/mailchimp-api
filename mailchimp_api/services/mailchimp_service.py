@@ -37,6 +37,11 @@ class MailchimpService:
 
         return self._mailchim_request_get(url)
 
+    def get_members_with_tags(self, list_id: str) -> dict[str, Any]:
+        url = f"{self.config.base_url}/lists/{list_id}/members?fields=members.id,members.email_address,members.tags"
+
+        return self._mailchim_request_get(url)
+
     def get_members(self, list_id: str) -> dict[str, list[dict[str, str]]]:
         url = f"{self.config.base_url}/lists/{list_id}/members?fields=members.email_address,members.id"
 
