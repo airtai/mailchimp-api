@@ -78,6 +78,7 @@ class TestMailchimpService:
             list_id="123",
             member_ids=["456", "789"],
             tag_name="tag1",
+            status="active",
         )
 
         mock_post.assert_called_once_with(

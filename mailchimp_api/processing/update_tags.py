@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+from typing import Literal
 
 import pandas as pd
 
@@ -46,20 +47,23 @@ def _batch_update_tags(
     mailchimp_service: MailchimpService,
     list_id: str,
     tag_members: dict[str, list[str]],
-    add: bool,
+    status: Literal["active", "inactive"],
 ) -> None:
     for tag_name, member_ids in tag_members.items():
-        if add:
-            mailchimp_service.post_batch_update_members_tag(
-                list_id=list_id,
-                member_ids=member_ids,
-                tag_name=tag_name,
-            )
+        mailchimp_service.post_batch_update_members_tag(
+            list_id=list_id,
+            member_ids=member_ids,
+            tag_name=tag_name,
+            status=status,
+        )
+        if status == "active":
+            # Add additional tag with the current date
             tag_name_with_date = f"{tag_name} - {datetime.now().strftime('%d.%m.%Y.')}"
             mailchimp_service.post_batch_update_members_tag(
                 list_id=list_id,
                 member_ids=member_ids,
                 tag_name=tag_name_with_date,
+                status=status,
             )
 
 
@@ -76,7 +80,14 @@ def _add_and_remove_tags(
         mailchimp_service=mailchimp_service,
         list_id=list_id,
         tag_members=add_tag_members,
-        add=True,
+        status="active",
+    )
+
+    _batch_update_tags(
+        mailchimp_service=mailchimp_service,
+        list_id=list_id,
+        tag_members=remove_tag_members,
+        status="inactive",
     )
 
 

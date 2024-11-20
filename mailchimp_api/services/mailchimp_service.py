@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, Literal
 
 import requests
 
@@ -53,7 +53,11 @@ class MailchimpService:
         return self._mailchim_request_get(url)
 
     def _post_batch_update_members_tag(
-        self, list_id: str, member_ids: list[str], tag_name: str
+        self,
+        list_id: str,
+        member_ids: list[str],
+        tag_name: str,
+        status: Literal["active", "inactive"],
     ) -> dict[str, str]:
         url = f"{self.config.base_url}/batches"
         body = {
@@ -62,7 +66,7 @@ class MailchimpService:
                     "method": "POST",
                     "path": f"/lists/{list_id}/members/{member_id}/tags",
                     "body": json.dumps(
-                        {"tags": [{"name": tag_name, "status": "active"}]}
+                        {"tags": [{"name": tag_name, "status": status}]}
                     ),
                 }
                 for member_id in member_ids
@@ -71,11 +75,15 @@ class MailchimpService:
         return self._mailchimp_request_post(url, body)
 
     def post_batch_update_members_tag(
-        self, list_id: str, member_ids: list[str], tag_name: str
+        self,
+        list_id: str,
+        member_ids: list[str],
+        tag_name: str,
+        status: Literal["active", "inactive"] = "active",
     ) -> dict[str, str]:
         # Split member_ids into chunks of 200
         for i in range(0, len(member_ids), 200):
             self._post_batch_update_members_tag(
-                list_id, member_ids[i : i + 200], tag_name
+                list_id, member_ids[i : i + 200], tag_name, status
             )
         return {"status": "success"}
