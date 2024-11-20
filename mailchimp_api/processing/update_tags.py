@@ -67,7 +67,7 @@ def _add_and_remove_tags(
     mailchimp_service: MailchimpService,
     list_id: str,
     members_with_tags_df: pd.DataFrame,
-) -> None:
+) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
     add_tag_members, remove_tag_members = _create_add_and_remove_tags_dicts(
         members_with_tags_df=members_with_tags_df,
     )
@@ -86,8 +86,12 @@ def _add_and_remove_tags(
         status="inactive",
     )
 
+    return add_tag_members, remove_tag_members
 
-def update_tags(crm_df: pd.DataFrame, config: Config, list_name: str) -> None:
+
+def update_tags(
+    crm_df: pd.DataFrame, config: Config, list_name: str
+) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
     """Update tags for members in the CRM."""
     # Create a Mailchimp service
     mailchimp_service = MailchimpService(config)
@@ -114,8 +118,10 @@ def update_tags(crm_df: pd.DataFrame, config: Config, list_name: str) -> None:
         members_with_tags_df["email"].isin(crm_emails)
     ]
 
-    _add_and_remove_tags(
+    add_tag_members, remove_tag_members = _add_and_remove_tags(
         mailchimp_service=mailchimp_service,
         list_id=list_id,
         members_with_tags_df=members_with_tags_df,
     )
+
+    return add_tag_members, remove_tag_members

@@ -162,7 +162,9 @@ class TestUpdateTags:
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = {"id": "batch_id"}
         mock_datetime.now.return_value = datetime(2024, 11, 15, 10, 44, 16, 794923)
-        update_tags(crm_df=crm_df, config=self.config, list_name="airt")
+        add_tag_members, remove_tag_members = update_tags(
+            crm_df=crm_df, config=self.config, list_name="airt"
+        )
 
         assert mock_get.call_count == 2
         for url in [
@@ -193,6 +195,12 @@ class TestUpdateTags:
                 },
                 timeout=10,
             )
+        assert add_tag_members == {
+            "M3": ["third_member_id"],
+        }
+        assert remove_tag_members == {
+            "M2": ["third_member_id"],
+        }
 
     @pytest.mark.skip(reason="real api call")
     def test_real_update_tags(self) -> None:
