@@ -17,14 +17,10 @@ next_tag_map = {
 def _create_add_and_remove_tags_dicts(
     members_with_tags_df: pd.DataFrame,
 ) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
-    # columns: id, email, tags
-    # e.g. "first_member_id", "email1@gmail.com", [{"id": 1, "name": "Test API Tag"}, {"id": 2, "name": "M3"}]
-
-    # create add_tag_members, remove_tag_members
     # keys are tags, values are list of member ids
     add_tag_members = defaultdict(list)
     remove_tag_members = defaultdict(list)
-    # dont use crm_df anymore
+
     for _, row in members_with_tags_df.iterrows():
         member_id = row["id"]
         tags = row["tags"]
