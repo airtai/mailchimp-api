@@ -2,6 +2,7 @@ import json
 from typing import Any, Literal
 
 import requests
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from ..config import Config
 
@@ -15,6 +16,9 @@ class MailchimpService:
         """
         self.config = config
 
+    @retry(
+        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=10)
+    )
     def _mailchim_request_get(self, url: str) -> dict[str, list[dict[str, str]]]:
         response = requests.get(url, headers=self.config.headers, timeout=10)
 
@@ -57,6 +61,9 @@ class MailchimpService:
 
         return self._mailchim_request_get(url)
 
+    @retry(
+        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=10)
+    )
     def _post_batch_update_members_tag(
         self,
         list_id: str,

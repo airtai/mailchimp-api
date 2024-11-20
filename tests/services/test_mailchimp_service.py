@@ -50,6 +50,16 @@ class TestMailchimpService:
         )
 
     @patch("mailchimp_api.services.mailchimp_service.requests.get")
+    def test_get_account_lists_with_error(self, mock_get: MagicMock) -> None:
+        mock_get.side_effect = [
+            Exception("Error 1"),
+            Exception("Error 2"),
+            MagicMock(status_code=200, json=lambda: {"status": "success"}),
+        ]
+        self.mailchimp_service.get_account_lists()
+        assert mock_get.call_count == 3
+
+    @patch("mailchimp_api.services.mailchimp_service.requests.get")
     def test_get_members(self, mock_get: MagicMock) -> None:
         self._setup_mailchimp_request_method(mock_get)
         self.mailchimp_service.get_members(list_id="123")
