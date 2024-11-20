@@ -105,7 +105,7 @@ select = [
 
 ignore = [
     "E501",  # line too long, handled by formatter later
-    "D100", "D101", "D102", "D103", "D104", "D107",
+    "D100", "D101", "D102", "D103", "D104",
 #     "C901",  # too complex
 ]
 

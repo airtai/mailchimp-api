@@ -8,6 +8,11 @@ from ..config import Config
 
 class MailchimpService:
     def __init__(self, config: Config) -> None:
+        """Initialize the MailchimpService with a configuration.
+
+        Args:
+            config (Config): The configuration object containing API details.
+        """
         self.config = config
 
     def _mailchim_request_get(self, url: str) -> dict[str, list[dict[str, str]]]:
