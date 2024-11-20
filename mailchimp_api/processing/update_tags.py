@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import datetime
 
 import pandas as pd
 
@@ -12,11 +13,9 @@ next_tag_map = {
 }
 
 
-def _add_and_remove_tags(
-    mailchimp_service: MailchimpService,
-    list_id: str,
+def _create_add_and_remove_tags_dicts(
     members_with_tags_df: pd.DataFrame,
-) -> None:
+) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
     # columns: id, email, tags
     # e.g. "first_member_id", "email1@gmail.com", [{"id": 1, "name": "Test API Tag"}, {"id": 2, "name": "M3"}]
 
@@ -40,8 +39,45 @@ def _add_and_remove_tags(
             add_tag_members[next_tag].append(member_id)
             remove_tag_members[tag_name].append(member_id)
 
-    # print(f"add_tag_members: {add_tag_members}")
-    # print(f"remove_tag_members: {remove_tag_members}")
+    return add_tag_members, remove_tag_members
+
+
+def _batch_update_tags(
+    mailchimp_service: MailchimpService,
+    list_id: str,
+    tag_members: dict[str, list[str]],
+    add: bool,
+) -> None:
+    for tag_name, member_ids in tag_members.items():
+        if add:
+            mailchimp_service.post_batch_update_members_tag(
+                list_id=list_id,
+                member_ids=member_ids,
+                tag_name=tag_name,
+            )
+            tag_name_with_date = f"{tag_name} - {datetime.now().strftime('%d.%m.%Y.')}"
+            mailchimp_service.post_batch_update_members_tag(
+                list_id=list_id,
+                member_ids=member_ids,
+                tag_name=tag_name_with_date,
+            )
+
+
+def _add_and_remove_tags(
+    mailchimp_service: MailchimpService,
+    list_id: str,
+    members_with_tags_df: pd.DataFrame,
+) -> None:
+    add_tag_members, remove_tag_members = _create_add_and_remove_tags_dicts(
+        members_with_tags_df=members_with_tags_df,
+    )
+
+    _batch_update_tags(
+        mailchimp_service=mailchimp_service,
+        list_id=list_id,
+        tag_members=add_tag_members,
+        add=True,
+    )
 
 
 def update_tags(crm_df: pd.DataFrame, config: Config, list_name: str) -> None:
