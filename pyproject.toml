@@ -9,6 +9,7 @@ name = "mailchimp_api"
 
 dependencies = [
     "fastagency[autogen,mesop,openapi,server,fastapi]>=0.3.0",
+    "python-multipart>=0.0.17"
 ]
 
 [project.optional-dependencies]
