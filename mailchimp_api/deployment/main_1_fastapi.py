@@ -42,14 +42,18 @@ def _save_file(file: UploadFile, timestamp: str) -> Path:
 
 @app.post("/upload")
 def upload(
-    account_name: str = Form(...),
     file: UploadFile = UploadFile(...),  # type: ignore[arg-type] # noqa: B008
     timestamp: str = Form(...),
 ) -> dict[str, str]:
-    if not account_name or file.size == 0:
+    if not file.size:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Please provide both account name and .csv file",
+            detail="Please provide .csv file",
+        )
+    if file.content_type != "text/csv":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only CSV files are supported",
         )
 
     path = _save_file(file, timestamp)
@@ -60,16 +64,15 @@ def upload(
             detail="'email' column not found in CSV file",
         )
 
-    return {"message": f"Successfully uploaded {file.filename}"}
+    return {
+        "message": f"Successfully uploaded {file.filename}. Please close the tab and go back to the chat."
+    }
 
 
 @app.get("/upload-file")
 def upload_file(timestamp: str = Query(default="default-timestamp")) -> HTMLResponse:
     content = f"""<body>
     <form action='/upload' enctype='multipart/form-data' method='post'>
-        <div>
-            <input name='account_name' type='text' placeholder='Enter account name'>
-        </div>
         <div style="margin-top: 15px;">
             <input name='file' type='file'>
         </div>
