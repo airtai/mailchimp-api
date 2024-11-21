@@ -3,7 +3,7 @@ from typing import Any
 
 import pandas as pd
 from fastagency.adapters.fastapi import FastAPIAdapter
-from fastapi import FastAPI, Form, HTTPException, UploadFile, status
+from fastapi import FastAPI, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import HTMLResponse
 
 from ..config import Config
@@ -71,6 +71,7 @@ def get_df(file: UploadFile) -> pd.DataFrame:
 def upload(
     account_name: str = Form(...),
     file: UploadFile = UploadFile(...),  # type: ignore[arg-type] # noqa: B008
+    timestamp: str = Form(...),
 ) -> dict[str, str]:
     if not account_name or file.size == 0:
         raise HTTPException(
@@ -92,8 +93,8 @@ def upload(
 
 
 @app.get("/upload-file")
-def main() -> HTMLResponse:
-    content = """<body>
+def upload_file(timestamp: str = Query(default="default-timestamp")) -> HTMLResponse:
+    content = f"""<body>
     <form action='/upload' enctype='multipart/form-data' method='post'>
         <div>
             <input name='account_name' type='text' placeholder='Enter account name'>
@@ -101,6 +102,8 @@ def main() -> HTMLResponse:
         <div style="margin-top: 15px;">
             <input name='file' type='file'>
         </div>
+        <!-- Hidden field for timestamp -->
+        <input name='timestamp' type='hidden' value='{timestamp}'>
         <div style="margin-top: 15px;">
             <input type='submit'>
         </div>
