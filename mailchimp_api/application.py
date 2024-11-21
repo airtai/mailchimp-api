@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 import pandas as pd
-from fastapi import FastAPI, HTTPException, UploadFile, status
+from fastapi import FastAPI, Form, HTTPException, UploadFile, status
 from fastapi.responses import HTMLResponse
 
 from .config import Config
@@ -55,10 +55,25 @@ def get_df(file: UploadFile) -> pd.DataFrame:
 
 
 @app.post("/upload")
-def upload(file: UploadFile) -> dict[str, str]:
+def upload(
+    account_name: str = Form(...),
+    file: UploadFile = UploadFile(...),  # type: ignore[arg-type] # noqa: B008
+) -> dict[str, str]:
+    if not account_name or file.size == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide both account name and file",
+        )
+
     df = get_df(file)
 
-    update_tags(crm_df=df, config=config, list_name="airt")
+    try:
+        update_tags(crm_df=df, config=config, list_name=account_name)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        ) from e
 
     return {"message": f"Successfully uploaded {file.filename}"}
 
@@ -68,8 +83,15 @@ def upload(file: UploadFile) -> dict[str, str]:
 def main() -> HTMLResponse:
     content = """<body>
     <form action='/upload' enctype='multipart/form-data' method='post'>
-        <input name='file' type='file'>
-        <input type='submit'>
+        <div>
+            <input name='account_name' type='text' placeholder='Enter account name'>
+        </div>
+        <div style="margin-top: 15px;">
+            <input name='file' type='file'>
+        </div>
+        <div style="margin-top: 15px;">
+            <input type='submit'>
+        </div>
     </form>
 </body>
 """
