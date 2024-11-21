@@ -18,3 +18,4 @@ token
 .DS_Store
 
 tmp_*
+mailchimp_api/uploaded_files

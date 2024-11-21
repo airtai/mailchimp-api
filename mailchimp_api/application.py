@@ -24,10 +24,12 @@ config = _get_config()
 
 
 def get_df(file: UploadFile) -> pd.DataFrame:
+    uploaded_files_dir = Path(__file__).parent / "uploaded_files"
+    uploaded_files_dir.mkdir(exist_ok=True)
     try:
         contents = file.file.read()
         filename = file.filename if file.filename else "uploaded_file"
-        path = Path(filename)
+        path = uploaded_files_dir / filename
         with path.open("wb") as f:
             f.write(contents)
     except Exception as e:
