@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -35,11 +36,11 @@ def _get_config() -> Config:
 config = _get_config()
 
 
-def get_df(file: UploadFile) -> pd.DataFrame:
+def _save_file(file: UploadFile, timestamp: str) -> Path:
     UPLOADED_FILES_DIR.mkdir(exist_ok=True)
     try:
         contents = file.file.read()
-        filename = file.filename if file.filename else "uploaded_file"
+        filename = f"uploaded-file-{timestamp}.csv"
         path = UPLOADED_FILES_DIR / filename
         with path.open("wb") as f:
             f.write(contents)
@@ -51,20 +52,7 @@ def get_df(file: UploadFile) -> pd.DataFrame:
     finally:
         file.file.close()
 
-    if path.suffix != ".csv":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only CSV files are supported",
-        )
-
-    df = pd.read_csv(path)
-    if "email" not in df.columns:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="'email' column not found in CSV file",
-        )
-
-    return df
+    return path
 
 
 @app.post("/upload")
@@ -76,11 +64,16 @@ def upload(
     if not account_name or file.size == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Please provide both account name and file",
+            detail="Please provide both account name and .csv file",
         )
 
-    df = get_df(file)
-
+    path = _save_file(file, timestamp)
+    df = pd.read_csv(path)
+    if "email" not in df.columns:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="'email' column not found in CSV file",
+        )
     try:
         update_tags(crm_df=df, config=config, list_name=account_name)
     except Exception as e:
