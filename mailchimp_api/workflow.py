@@ -1,47 +1,34 @@
 import os
+import time
 from typing import Any
 
-from autogen.agentchat import ConversableAgent
 from fastagency import UI
 from fastagency.runtimes.autogen import AutoGenWorkflows
 
-llm_config = {
-    "config_list": [
-        {
-            "model": "gpt-4o-mini",
-            "api_key": os.getenv("OPENAI_API_KEY"),
-        }
-    ],
-    "temperature": 0.8,
-}
+from .constants import UPLOADED_FILES_DIR
 
 wf = AutoGenWorkflows()
+
+FASTAPI_URL = os.getenv("FASTAPI_URL", "http://localhost:8008")
 
 
 @wf.register(name="simple_learning", description="Student and teacher learning chat")  # type: ignore[misc]
 def simple_workflow(ui: UI, params: dict[str, Any]) -> str:
-    initial_message = ui.text_input(
+    body = f"""Please upload **.csv** file with the email addresses for which you want to update the tags.
+
+<a href="{FASTAPI_URL}/upload-file" target="_blank">Upload File</a>
+"""
+    ui.text_message(
         sender="Workflow",
         recipient="User",
-        prompt="I can help you learn about mathematics. What subject you would like to explore?",
+        body=body,
     )
 
-    student_agent = ConversableAgent(
-        name="Student_Agent",
-        system_message="You are a student willing to learn.",
-        llm_config=llm_config,
-    )
-    teacher_agent = ConversableAgent(
-        name="Teacher_Agent",
-        system_message="You are a math teacher.",
-        llm_config=llm_config,
-    )
+    file_name = "import_audience.csv"
+    file_path = UPLOADED_FILES_DIR / file_name
+    while not file_path.exists():
+        time.sleep(2)
 
-    chat_result = student_agent.initiate_chat(
-        teacher_agent,
-        message=initial_message,
-        summary_method="reflection_with_llm",
-        max_turns=3,
-    )
+    file_path.unlink()
 
-    return str(chat_result.summary)
+    return "Done"

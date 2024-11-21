@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -8,6 +7,7 @@ from fastapi import FastAPI, Form, HTTPException, UploadFile, status
 from fastapi.responses import HTMLResponse
 
 from ..config import Config
+from ..constants import UPLOADED_FILES_DIR
 from ..processing.update_tags import update_tags
 from ..workflow import wf
 
@@ -36,12 +36,11 @@ config = _get_config()
 
 
 def get_df(file: UploadFile) -> pd.DataFrame:
-    uploaded_files_dir = Path(__file__).parent.parent / "uploaded_files"
-    uploaded_files_dir.mkdir(exist_ok=True)
+    UPLOADED_FILES_DIR.mkdir(exist_ok=True)
     try:
         contents = file.file.read()
         filename = file.filename if file.filename else "uploaded_file"
-        path = uploaded_files_dir / filename
+        path = UPLOADED_FILES_DIR / filename
         with path.open("wb") as f:
             f.write(contents)
     except Exception as e:
@@ -92,7 +91,7 @@ def upload(
     return {"message": f"Successfully uploaded {file.filename}"}
 
 
-@app.get("/upload-page")
+@app.get("/upload-file")
 def main() -> HTMLResponse:
     content = """<body>
     <form action='/upload' enctype='multipart/form-data' method='post'>
@@ -112,4 +111,4 @@ def main() -> HTMLResponse:
 
 
 # start the adapter with the following command
-# uvicorn mailchimp_api.deployment.main_1_fastapi:app --reload
+# uvicorn mailchimp_api.deployment.main_1_fastapi:app -b 0.0.0.0:8008 --reload
