@@ -4,7 +4,7 @@ import pytest
 from fastapi import HTTPException, UploadFile
 from pandas import DataFrame
 
-from mailchimp_api.application import get_df
+from mailchimp_api.deployment.main_1_fastapi import get_df
 
 
 class TestUploadFile:
