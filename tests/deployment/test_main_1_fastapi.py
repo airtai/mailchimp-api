@@ -1,6 +1,9 @@
 from io import BytesIO
+from pathlib import Path
 
 import pandas as pd
+import pytest
+from _pytest.monkeypatch import MonkeyPatch
 from fastapi import UploadFile
 from fastapi.testclient import TestClient
 
@@ -9,6 +12,21 @@ from mailchimp_api.deployment.main_1_fastapi import _save_file, app
 
 class TestApp:
     client = TestClient(app)
+
+    @pytest.fixture(autouse=True)
+    def patch_uploaded_files_dir(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch
+    ) -> Path:
+        uploaded_files_dir = tmp_path / "uploads"
+        uploaded_files_dir.mkdir(exist_ok=True)
+
+        monkeypatch.setattr(
+            "mailchimp_api.deployment.main_1_fastapi.UPLOADED_FILES_DIR",
+            uploaded_files_dir,
+        )
+
+        # Return the temporary directory so it can be used in tests if needed
+        return uploaded_files_dir
 
     def test_save_file(self) -> None:
         csv_content = "email\nexample1@example.com\nexample2@example.com"
