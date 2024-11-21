@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import Any
 
@@ -7,9 +6,7 @@ from fastagency.adapters.fastapi import FastAPIAdapter
 from fastapi import FastAPI, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import HTMLResponse
 
-from ..config import Config
 from ..constants import UPLOADED_FILES_DIR
-from ..processing.update_tags import update_tags
 from ..workflow import wf
 
 adapter = FastAPIAdapter(provider=wf)
@@ -24,24 +21,12 @@ def list_workflows() -> dict[str, Any]:
     return {"Workflows": {name: wf.get_description(name) for name in wf.names}}
 
 
-def _get_config() -> Config:
-    api_key = os.getenv("MAILCHIMP_API_KEY")
-    if not api_key:
-        raise ValueError("MAILCHIMP_API_KEY not set")
-
-    config = Config("us14", api_key)
-    return config
-
-
-config = _get_config()
-
-
 def _save_file(file: UploadFile, timestamp: str) -> Path:
     UPLOADED_FILES_DIR.mkdir(exist_ok=True)
     try:
         contents = file.file.read()
-        filename = f"uploaded-file-{timestamp}.csv"
-        path = UPLOADED_FILES_DIR / filename
+        file_name = f"uploaded-file-{timestamp}.csv"
+        path = UPLOADED_FILES_DIR / file_name
         with path.open("wb") as f:
             f.write(contents)
     except Exception as e:
@@ -74,13 +59,6 @@ def upload(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="'email' column not found in CSV file",
         )
-    try:
-        update_tags(crm_df=df, config=config, list_name=account_name)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e),
-        ) from e
 
     return {"message": f"Successfully uploaded {file.filename}"}
 
