@@ -74,3 +74,14 @@ class TestApp:
         )
         assert response.status_code == 400
         assert "Only CSV files are supported" in response.text
+
+    def test_upload_endpoint_raises_400_error_if_email_column_not_found(self) -> None:
+        csv_content = "name\n"
+        csv_file = BytesIO(csv_content.encode("utf-8"))
+        response = self.client.post(
+            "/upload",
+            files={"file": ("emails.csv", csv_file)},
+            data={"timestamp": "test-22-09-2021"},
+        )
+        assert response.status_code == 400
+        assert "'email' column not found in CSV file" in response.text

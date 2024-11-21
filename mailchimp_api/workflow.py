@@ -27,7 +27,7 @@ def _get_config() -> Config:
 config = _get_config()
 
 
-@wf.register(name="simple_learning", description="Student and teacher learning chat")  # type: ignore[misc]
+@wf.register(name="mailchimp_chat", description="Mailchimp tags update chat")  # type: ignore[misc]
 def simple_workflow(ui: UI, params: dict[str, Any]) -> str:
     timestamp = time.strftime("%Y-%m-%d-%H-%M-%S")
     body = f"""Please upload **.csv** file with the email addresses for which you want to update the tags.
