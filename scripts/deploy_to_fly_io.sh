@@ -8,3 +8,4 @@ fly launch --config fly.toml --copy-config --yes
 
 echo -e "\033[0;32mSetting secrets\033[0m"
 fly secrets set OPENAI_API_KEY=$OPENAI_API_KEY
+fly secrets set MAILCHIMP_API_KEY=$MAILCHIMP_API_KEY
